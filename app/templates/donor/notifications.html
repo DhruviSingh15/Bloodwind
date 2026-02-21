@@ -1,0 +1,243 @@
+{% extends "layout.html" %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h2 class="mb-0"><i class="fas fa-bell me-2"></i> Notifications</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead text-center mb-4">Stay updated with important alerts and blood donation requests</p>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-cog me-2"></i> Notification Preferences</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('donor.notifications') }}" method="post" id="notificationPreferencesForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Notification Methods</h6>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailNotifications" name="email_notifications" {% if current_user.donor_profile.email_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="emailNotifications">Email Notifications</label>
+                                    </div>
+                                    <small class="text-muted d-block mb-3">Receive notifications via email at {{ current_user.email }}</small>
+                                    
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="smsNotifications" name="sms_notifications" {% if current_user.donor_profile.sms_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="smsNotifications">SMS Notifications</label>
+                                    </div>
+                                    <small class="text-muted d-block mb-3">Receive SMS alerts at {{ current_user.phone_number or current_user.donor_profile.phone }}</small>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Notification Types</h6>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="donationReminders" name="donation_reminders" {% if current_user.donor_profile.donation_reminders %}checked{% endif %}>
+                                        <label class="form-check-label" for="donationReminders">Donation Reminders</label>
+                                    </div>
+                                    <small class="text-muted d-block mb-3">Receive reminders when you're eligible to donate again</small>
+                                    
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="eligibilityAlerts" name="eligibility_alerts" {% if current_user.donor_profile.eligibility_alerts %}checked{% endif %}>
+                                        <label class="form-check-label" for="eligibilityAlerts">Eligibility Alerts</label>
+                                    </div>
+                                    <small class="text-muted d-block mb-3">Get alerts about your donation eligibility status</small>
+                                </div>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-save me-2"></i> Save Preferences
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                {% if notifications.items %}
+                <div class="list-group">
+                    {% for notification in notifications.items %}
+                    <div class="list-group-item list-group-item-action {% if not notification.read %}list-group-item-danger{% endif %}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">
+                                {% if not notification.read %}<span class="badge bg-danger">New</span>{% endif %}
+                                {{ notification.title }}
+                            </h5>
+                            <small>{{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <p class="mb-1">{{ notification.message }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <small class="text-muted">From: {{ notification.sender }}</small>
+                            {% if notification.action_url %}
+                            <a href="{{ notification.action_url }}" class="btn btn-sm btn-outline-danger">
+                                {{ notification.action_text if notification.action_text else 'View Details' }}
+                            </a>
+                            {% endif %}
+                            {% if not notification.is_read %}
+                            <form action="{{ url_for('donor.mark_notification_read', notification_id=notification.id) }}" method="post" class="d-inline">
+                                <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                                <button type="submit" class="btn btn-sm btn-link text-muted">Mark as read</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination controls -->
+                {% if notifications.pages > 1 %}
+                <nav aria-label="Notifications pagination" class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous page -->
+                        <li class="page-item {% if notifications.page == 1 %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('donor.notifications', page=notifications.prev_num) if notifications.has_prev else '#' }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Page numbers -->
+                        {% for page_num in notifications.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if page_num %}
+                                <li class="page-item {% if page_num == notifications.page %}active{% endif %}">
+                                    <a class="page-link" href="{{ url_for('donor.notifications', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Next page -->
+                        <li class="page-item {% if not notifications.has_next %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('donor.notifications', page=notifications.next_num) if notifications.has_next else '#' }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center text-muted mt-2">
+                    <small>Page {{ notifications.page }} of {{ notifications.pages }} | Showing {{ notifications.items|length }} of {{ notifications.total }} notifications</small>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-5x text-muted mb-3"></i>
+                    <h3>No Notifications</h3>
+                    <p class="lead">You don't have any notifications at the moment.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Handle notification preferences form submission with real-time feedback
+        const notificationForm = document.getElementById('notificationPreferencesForm');
+        if (notificationForm) {
+            // Add loading indicator to the submit button
+            const submitBtn = notificationForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            notificationForm.addEventListener('submit', function() {
+                // Show loading state
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Saving...';
+                submitBtn.disabled = true;
+                
+                // Form will submit normally, this just shows a loading state
+                setTimeout(function() {
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }, 2000); // Reset after 2 seconds if the page doesn't reload
+            });
+            
+            // Real-time AJAX updates for preferences (optional)
+            const checkboxes = notificationForm.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Show visual feedback that changes are pending submission
+                    submitBtn.classList.add('btn-warning');
+                    submitBtn.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i> Save Changes';
+                });
+            });
+        }
+        
+        // Mark notification as read via AJAX
+        const markReadButtons = document.querySelectorAll('.btn-link');
+        markReadButtons.forEach(button => {
+            if (button.textContent.includes('Mark as read')) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+                    const notificationId = form.querySelector('input[name="notification_id"]').value;
+                    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+                    const notificationItem = this.closest('.list-group-item');
+                    
+                    // Show loading state
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Marking...';
+                    this.disabled = true;
+                    
+                    fetch(`{{ url_for('donor.mark_notification_read', notification_id=0) }}`.replace('0', notificationId), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update UI
+                            notificationItem.classList.remove('list-group-item-danger');
+                            const badge = notificationItem.querySelector('.badge.bg-danger');
+                            if (badge) badge.remove();
+                            this.innerHTML = '<i class="fas fa-check"></i> Marked as read';
+                            setTimeout(() => {
+                                this.style.display = 'none';
+                            }, 1000);
+                        } else {
+                            throw new Error(data.message || 'Failed to mark as read');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                        alert('Failed to mark notification as read. Please try again.');
+                    });
+                });
+            }
+        });
+        
+        // Show warning if SMS notifications are enabled but no phone number is available
+        const smsCheckbox = document.getElementById('smsNotifications');
+        if (smsCheckbox) {
+            smsCheckbox.addEventListener('change', function() {
+                const phoneNumber = '{{ current_user.phone_number or current_user.donor_profile.phone }}';
+                const warningContainer = this.closest('.form-check').nextElementSibling;
+                
+                if (this.checked && (!phoneNumber || phoneNumber === 'None')) {
+                    warningContainer.innerHTML = '<div class="alert alert-warning mt-2"><i class="fas fa-exclamation-triangle me-2"></i> Please update your profile with a valid phone number to receive SMS notifications.</div>';
+                } else if (warningContainer.querySelector('.alert-warning')) {
+                    warningContainer.querySelector('.alert-warning').remove();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

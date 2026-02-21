@@ -1,0 +1,388 @@
+{% extends "layout.html" %}
+{% block title %}Donation History{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h2 class="mb-0"><i class="fas fa-history me-2"></i> Donation History</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead text-center mb-4">Complete record of all blood donations at your hospital</p>
+                
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <form method="GET" action="{{ url_for('hospital.donation_history') }}" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="all">All Statuses</option>
+                                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Approved</option>
+                                    <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>Completed</option>
+                                    <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="blood_group" class="form-label">Blood Group</label>
+                                <select class="form-select" id="blood_group" name="blood_group">
+                                    <option value="all">All Blood Groups</option>
+                                    <option value="A+" {% if current_blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                    <option value="A-" {% if current_blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                    <option value="B+" {% if current_blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                    <option value="B-" {% if current_blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                    <option value="AB+" {% if current_blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                    <option value="AB-" {% if current_blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                    <option value="O+" {% if current_blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                    <option value="O-" {% if current_blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-filter me-2"></i> Filter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end justify-content-end">
+                        <a href="{{ url_for('hospital.export_donations_csv', status=current_status, blood_group=current_blood_group) }}" class="btn btn-outline-danger">
+                            <i class="fas fa-file-export me-2"></i> Export to CSV
+                        </a>
+                    </div>
+                </div>
+                
+                {% if donations.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Donation ID</th>
+                                <th>Donor</th>
+                                <th>Blood Group</th>
+                                <th>Date</th>
+                                <th>Units</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donation in donations.items %}
+                            <tr>
+                                <td>#{{ donation.id }}</td>
+                                <td>
+                                    <span class="fw-bold">{{ donation.donor.donor_profile.name }}</span><br>
+                                    <small class="text-muted">{{ donation.donor.email }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill 
+                                    {% if donation.donor.donor_profile.blood_group == 'O-' %}bg-danger{% 
+                                    elif donation.donor.donor_profile.blood_group == 'O+' %}bg-warning text-dark{% 
+                                    elif donation.donor.donor_profile.blood_group == 'A+' %}bg-success{% 
+                                    elif donation.donor.donor_profile.blood_group == 'A-' %}bg-success text-white{% 
+                                    elif donation.donor.donor_profile.blood_group == 'B+' %}bg-primary{% 
+                                    elif donation.donor.donor_profile.blood_group == 'B-' %}bg-primary text-white{% 
+                                    elif donation.donor.donor_profile.blood_group == 'AB+' %}bg-info text-dark{% 
+                                    elif donation.donor.donor_profile.blood_group == 'AB-' %}bg-info text-white{% 
+                                    else %}bg-secondary{% endif %}">
+                                        {{ donation.donor.donor_profile.blood_group }}
+                                    </span>
+                                </td>
+                                <td>{{ donation.request_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ donation.units }}</td>
+                                <td>
+                                    {% if donation.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif donation.status == 'approved' %}
+                                    <span class="badge bg-success">Approved</span>
+                                    {% elif donation.status == 'completed' %}
+                                    <span class="badge bg-primary">Completed</span>
+                                    {% elif donation.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ donation.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if donation.notes %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="{{ donation.notes }}">
+                                        <i class="fas fa-sticky-note"></i> View
+                                    </button>
+                                    {% else %}
+                                    <span class="text-muted">No notes</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if donation.status == 'pending' %}
+                                    <div class="btn-group" role="group">
+                                        <form action="{{ url_for('hospital.approve_donation', donation_id=donation.id) }}" method="post" class="me-1">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form action="{{ url_for('hospital.reject_donation', donation_id=donation.id) }}" method="post">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% elif donation.status == 'approved' %}
+                                    <form action="{{ url_for('hospital.mark_completed', donation_id=donation.id) }}" method="post">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-check-double"></i> Mark Completed
+                                        </button>
+                                    </form>
+                                    {% elif donation.status == 'completed' %}
+                                    <button type="button" class="btn btn-sm btn-outline-success generate-certificate-btn" 
+                                            data-donation-id="{{ donation.id }}"
+                                            data-donor-name="{{ donation.donor.donor_profile.name }}"
+                                            data-csrf-token="{{ csrf_token() }}">
+                                        <i class="fas fa-file-medical"></i> Certificate
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if donations.pages > 1 %}
+                <nav aria-label="Donation history pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not donations.has_prev %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('hospital.donation_history', page=donations.prev_num, status=current_status, blood_group=current_blood_group) if donations.has_prev else '#' }}">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        
+                        {% for page_num in range(max(1, donations.page - 2), min(donations.pages + 1, donations.page + 3)) %}
+                        <li class="page-item {% if page_num == donations.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('hospital.donation_history', page=page_num, status=current_status, blood_group=current_blood_group) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        
+                        <li class="page-item {% if not donations.has_next %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('hospital.donation_history', page=donations.next_num, status=current_status, blood_group=current_blood_group) if donations.has_next else '#' }}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <div class="text-center text-muted">
+                    Showing {{ (donations.page - 1) * donations.per_page + 1 }} to 
+                    {{ min(donations.page * donations.per_page, total_donations) }} of 
+                    {{ total_donations }} donations
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-tint fa-5x text-muted mb-3"></i>
+                    <h3>No Donation Records</h3>
+                    <p class="lead">There are no donation records matching your criteria.</p>
+                    <a href="{{ url_for('hospital.request_blood') }}" class="btn btn-danger mt-3">
+                        <i class="fas fa-broadcast-tower me-2"></i> Request Blood Donation
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Donation Statistics</h3>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h1 class="display-4 text-danger">{{ stats.total_donations }}</h1>
+                                <p class="text-muted">Total Donations</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h1 class="display-4 text-danger">{{ stats.total_units }}</h1>
+                                <p class="text-muted">Units Collected</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h1 class="display-4 text-danger">{{ stats.month_donations }}</h1>
+                                <p class="text-muted">This Month</p>
+                                <small class="text-muted">{{ stats.month_units }} units</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h1 class="display-4 text-danger">{{ stats.approval_rate }}%</h1>
+                                <p class="text-muted">Approval Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> 
+                    <strong>Note:</strong> Detailed donation statistics will be available in a future update. 
+                    <a href="{{ url_for('hospital.request_blood') }}" class="alert-link">Request blood donations</a> from eligible donors in your area.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Single Certificate Modal (Reused for all certificates) -->
+<div class="modal fade" id="certificateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Donation Certificate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="certificateModalText">Generate and send a donation certificate?</p>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    The donor will be notified when the certificate is ready.
+                </small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="generateCertificateBtn">
+                    <i class="fas fa-file-medical me-1"></i> Generate & Send
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Initialize popovers -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl)
+        })
+    });
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize popovers
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+    
+    // Get the single certificate modal instance
+    const certificateModal = document.getElementById('certificateModal');
+    const modal = new bootstrap.Modal(certificateModal);
+    const generateBtn = document.getElementById('generateCertificateBtn');
+    let currentDonationId = null;
+    let currentCsrfToken = null;
+    
+    // Handle certificate button clicks
+    document.querySelectorAll('.generate-certificate-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Store the donation information
+            currentDonationId = this.dataset.donationId;
+            currentCsrfToken = this.dataset.csrfToken;
+            
+            // Update modal text
+            document.getElementById('certificateModalText').textContent = 
+                `Generate and send a donation certificate to ${this.dataset.donorName}?`;
+            
+            // Reset generate button state
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-file-medical me-1"></i> Generate & Send';
+            
+            // Show modal
+            modal.show();
+        });
+    });
+    
+    // Handle certificate generation
+    generateBtn.addEventListener('click', function() {
+        if (!currentDonationId) return;
+        
+        // Disable button and show loading state
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Generating...';
+        
+        // Submit the request
+        fetch(`/hospital/donation/${currentDonationId}/generate-certificate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': currentCsrfToken
+            },
+            body: `csrf_token=${currentCsrfToken}`
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(() => {
+            // Hide modal
+            modal.hide();
+            
+            // Show success alert
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show';
+            alert.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i> Certificate has been generated and notification sent to donor.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.card-body').insertBefore(alert, document.querySelector('.card-body').firstChild);
+            
+            // Auto-dismiss alert after 5 seconds
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            
+            // Hide modal
+            modal.hide();
+            
+            // Show error message
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.innerHTML = `
+                <i class="fas fa-exclamation-circle me-2"></i> Error generating certificate. Please try again.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.card-body').insertBefore(alert, document.querySelector('.card-body').firstChild);
+        });
+    });
+    
+    // Reset state when modal is hidden
+    certificateModal.addEventListener('hidden.bs.modal', function() {
+        currentDonationId = null;
+        currentCsrfToken = null;
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<i class="fas fa-file-medical me-1"></i> Generate & Send';
+    });
+});
+</script>
+{% endblock %}

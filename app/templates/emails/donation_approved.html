@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donation Approved</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .header {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .details {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .details p {
+            margin: 5px 0;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Donation Approved</h1>
+        </div>
+        <div class="content">
+            <p>Hello {{ user.name }},</p>
+            
+            <p>Great news! Your blood donation request has been <span class="highlight">approved</span>.</p>
+            
+            <div class="details">
+                <h3>Donation Details:</h3>
+                {% if notification.related_entity_type == 'donation' and notification.related_entity_id %}
+                {% set donation = get_donation(notification.related_entity_id) %}
+                {% if donation %}
+                <p><strong>Hospital:</strong> {{ donation.hospital.name }}</p>
+                <p><strong>Address:</strong> {{ donation.hospital.address }}</p>
+                <p><strong>Date Requested:</strong> {{ donation.request_date.strftime('%Y-%m-%d') }}</p>
+                <p><strong>Blood Group:</strong> {{ donation.blood_group }}</p>
+                <p><strong>Units:</strong> {{ donation.units }} ({{ donation.units * 500 }}ml)</p>
+                {% endif %}
+                {% endif %}
+            </div>
+            
+            <p>Please visit the hospital at your earliest convenience to complete your donation. Remember to bring a valid ID with you.</p>
+            
+            <p>Thank you for your generosity and commitment to saving lives!</p>
+            
+            <a href="{{ url_for('donor.donation_history', _external=True) }}" class="btn">View Donation History</a>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from the Blood Donation Management System.</p>
+            <p>© {{ timestamp.year }} Blood Donation Management System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

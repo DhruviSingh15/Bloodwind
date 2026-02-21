@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Blood Donation Certificate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            color: #2c3e50;
+        }
+        .certificate {
+            width: 1000px;
+            height: 700px;
+            margin: 0 auto;
+            background-color: #fff;
+            position: relative;
+            padding: 50px;
+            box-sizing: border-box;
+        }
+        .border-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid #e74c3c;
+            margin: 20px;
+        }
+        .inner-frame {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px solid #e74c3c;
+            margin: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        .organization {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 48px;
+            color: #e74c3c;
+            font-weight: 700;
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            line-height: 1.2;
+        }
+        .subtitle {
+            font-size: 20px;
+            color: #34495e;
+            margin-bottom: 30px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        .content {
+            text-align: center;
+            margin: 40px 0;
+            position: relative;
+            z-index: 1;
+        }
+        .this-certifies {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .recipient {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 36px;
+            color: #2c3e50;
+            margin: 20px 0;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .details {
+            font-size: 18px;
+            color: #34495e;
+            line-height: 1.8;
+            margin: 30px 0;
+        }
+        .donation-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+        }
+        .info-item {
+            text-align: center;
+        }
+        .info-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 18px;
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        .footer {
+            position: absolute;
+            bottom: 80px;
+            left: 50px;
+            right: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .signature {
+            text-align: center;
+            width: 220px;
+        }
+        .signature-line {
+            width: 100%;
+            border-top: 2px solid #2c3e50;
+            margin-bottom: 10px;
+        }
+        .signature-name {
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .signature-title {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .certificate-id {
+            position: absolute;
+            bottom: 30px;
+            right: 50px;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            opacity: 0.03;
+            z-index: 0;
+            width: 600px;
+            height: 600px;
+        }
+        .seal {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="%23e74c3c" stroke-width="2"/><circle cx="50" cy="50" r="40" fill="none" stroke="%23e74c3c" stroke-width="1"/></svg>');
+            background-size: contain;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="border-frame"></div>
+        <div class="inner-frame"></div>
+        <img src="blood_drop.svg" class="watermark">
+        
+        <div class="header">
+            <div class="organization">BLOOD DONATION MANAGEMENT SYSTEM</div>
+            <div class="title">Certificate of Recognition</div>
+            <div class="subtitle">FOR OUTSTANDING CONTRIBUTION TO SAVING LIVES</div>
+        </div>
+        
+        <div class="content">
+            <div class="this-certifies">This is to certify that</div>
+            <div class="recipient">{{donor_name}}</div>
+            <div class="details">
+                has demonstrated exceptional humanitarian spirit by donating blood<br>
+                and contributing to the noble cause of saving lives.
+            </div>
+            
+            <div class="donation-info">
+                <div class="info-item">
+                    <div class="info-label">BLOOD GROUP</div>
+                    <div class="info-value">{{blood_group}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">UNITS DONATED</div>
+                    <div class="info-value">{{units}}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">LIVES IMPACTED</div>
+                    <div class="info-value">{{lives_saved}}</div>
+                </div>
+            </div>
+            
+            <div class="details">
+                Donation Date: {{donation_date}}<br>
+                Location: {{hospital_name}}, {{hospital_address}}
+            </div>
+        </div>
+        
+        <div class="seal"></div>
+        
+        <div class="footer">
+            <div class="signature">
+                <div class="signature-line"></div>
+                <div class="signature-name">Dr. {{hospital_director}}</div>
+                <div class="signature-title">Hospital Director</div>
+            </div>
+            <div class="signature">
+                <div class="signature-line"></div>
+                <div class="signature-name">Dr. {{medical_officer}}</div>
+                <div class="signature-title">Medical Officer</div>
+            </div>
+        </div>
+        
+        <div class="certificate-id">Certificate ID: {{certificate_id}}</div>
+    </div>
+</body>
+</html>

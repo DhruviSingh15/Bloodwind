@@ -1,0 +1,284 @@
+{% extends "layout.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Admin Dashboard</h2>
+        <p class="lead">Manage the blood donation system and monitor key metrics.</p>
+    </div>
+</div>
+
+<!-- Stats Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <i class="fas fa-users"></i>
+            <div class="stat-value">{{ donor_count }}</div>
+            <div class="stat-label">Registered Donors</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <i class="fas fa-hospital"></i>
+            <div class="stat-value">{{ hospital_count }}</div>
+            <div class="stat-label">Registered Hospitals</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <i class="fas fa-tint"></i>
+            <div class="stat-value">{{ donation_count }}</div>
+            <div class="stat-label">Total Donation Requests</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <i class="fas fa-check-circle"></i>
+            <div class="stat-value">{{ approved_donations }}</div>
+            <div class="stat-label">Approved Donations</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Blood Group Distribution -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Blood Group Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="blood-group-chart" 
+                        data-blood-groups="{{ blood_groups|map(attribute=0)|list|tojson }}" 
+                        data-counts="{{ blood_groups|map(attribute=1)|list|tojson }}"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Donation Trend -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Donation Trend (Last 7 Days)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="donation-trend-chart" 
+                        data-dates="{{ donation_trend|map(attribute='date')|list|tojson }}" 
+                        data-counts="{{ donation_trend|map(attribute='count')|list|tojson }}"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Donations -->
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-history me-2"></i> Recent Donations</h5>
+        <a href="{{ url_for('admin.all_donations') }}" class="btn btn-sm btn-light">View All</a>
+    </div>
+    <div class="card-body p-0">
+        {% if recent_donations %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Donor</th>
+                            <th>Hospital</th>
+                            <th>Blood Group</th>
+                            <th>Units</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donation in recent_donations %}
+                            <tr>
+                                <td>{{ donation.donor.donor_profile.name }}</td>
+                                <td>{{ donation.hospital.name }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if donation.blood_group == 'A+' %}blood-a-pos
+                                        {% elif donation.blood_group == 'A-' %}blood-a-neg
+                                        {% elif donation.blood_group == 'B+' %}blood-b-pos
+                                        {% elif donation.blood_group == 'B-' %}blood-b-neg
+                                        {% elif donation.blood_group == 'AB+' %}blood-ab-pos
+                                        {% elif donation.blood_group == 'AB-' %}blood-ab-neg
+                                        {% elif donation.blood_group == 'O+' %}blood-o-pos
+                                        {% elif donation.blood_group == 'O-' %}blood-o-neg
+                                        {% endif %}">
+                                        {{ donation.blood_group }}
+                                    </span>
+                                </td>
+                                <td>{{ donation.units }}</td>
+                                <td>
+                                    <span class="badge {% if donation.status == 'approved' %}bg-success{% elif donation.status == 'pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                        {{ donation.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>{{ donation.request_date.strftime('%d %b, %Y') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-tint-slash fa-3x text-muted mb-3"></i>
+                <p>No donations recorded yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="fas fa-bolt me-2"></i> Administrative Actions</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users-cog fa-3x text-danger mb-3"></i>
+                        <h5>User Management</h5>
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-danger btn-sm">Manage Users</a>
+                            <a href="{{ url_for('admin.manage_admins') }}" class="btn btn-outline-danger btn-sm">Manage Admins</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <i class="fas fa-sms fa-3x text-danger mb-3"></i>
+                        <h5>SMS Notifications</h5>
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{{ url_for('admin.test_sms') }}" class="btn btn-outline-danger btn-sm">Test SMS Functionality</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <i class="fas fa-database fa-3x text-danger mb-3"></i>
+                        <h5>Data Management</h5>
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{{ url_for('admin.all_donations') }}" class="btn btn-outline-danger btn-sm">Donation Records</a>
+                            <a href="{{ url_for('admin.all_inventory') }}" class="btn btn-outline-danger btn-sm">Blood Inventory</a>
+                            <a href="{{ url_for('admin.analytics') }}" class="btn btn-outline-danger btn-sm">System Analytics</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-shield fa-3x text-danger mb-3"></i>
+                        <h5>Admin Controls</h5>
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{{ url_for('admin.create_admin') }}" class="btn btn-outline-danger btn-sm">Create Admin</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Blood Group Distribution Chart
+        const bloodGroupChart = document.getElementById('blood-group-chart');
+        if (bloodGroupChart) {
+            const ctx = bloodGroupChart.getContext('2d');
+            
+            // Get data from the page
+            const bloodGroups = JSON.parse(bloodGroupChart.getAttribute('data-blood-groups'));
+            const counts = JSON.parse(bloodGroupChart.getAttribute('data-counts'));
+            
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: bloodGroups,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: [
+                            '#28a745', // A+
+                            '#20c997', // A-
+                            '#fd7e14', // B+
+                            '#ffc107', // B-
+                            '#6f42c1', // AB+
+                            '#6610f2', // AB-
+                            '#dc3545', // O+
+                            '#e83e8c'  // O-
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Donor Blood Group Distribution'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Donation Trend Chart
+        const trendChart = document.getElementById('donation-trend-chart');
+        if (trendChart) {
+            const ctx = trendChart.getContext('2d');
+            
+            // Get data from the page
+            const dates = JSON.parse(trendChart.getAttribute('data-dates'));
+            const counts = JSON.parse(trendChart.getAttribute('data-counts'));
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Donations',
+                        data: counts,
+                        backgroundColor: 'rgba(220, 53, 69, 0.2)',
+                        borderColor: '#dc3545',
+                        borderWidth: 2,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Donations'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

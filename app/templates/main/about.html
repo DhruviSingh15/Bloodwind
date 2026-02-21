@@ -1,0 +1,140 @@
+{% extends "layout.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h2 class="mb-0">About BloodWind</h2>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-heartbeat fa-5x text-danger mb-3"></i>
+                    <h3>Our Mission</h3>
+                    <p class="lead">Connecting donors and hospitals to save lives through efficient blood donation management.</p>
+                </div>
+                
+                <p>BloodWind is a comprehensive blood donation management system designed to streamline the process of blood donation and distribution. Our platform connects willing donors with hospitals in need, ensuring that life-saving blood is available when and where it's needed most.</p>
+                
+                <h4 class="mt-4">What We Do</h4>
+                <p>Our system provides a seamless experience for both donors and hospitals:</p>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5><i class="fas fa-user text-danger me-2"></i> For Donors</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Easy registration and profile management</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Automatic eligibility checking</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Convenient donation request submission</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Complete donation history tracking</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> SMS notifications for urgent blood needs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5><i class="fas fa-hospital text-danger me-2"></i> For Hospitals</h5>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Comprehensive blood inventory management</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Efficient donation request processing</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Broadcast requests for specific blood types</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Real-time inventory tracking</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Detailed donation records</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 class="mt-4">Our Impact</h4>
+                <p>Every two seconds, someone needs blood. A single donation can save up to three lives. Through BloodWind, we aim to:</p>
+                
+                <div class="row text-center mt-3">
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <i class="fas fa-hand-holding-heart fa-3x text-danger mb-3"></i>
+                                <h5>Increase Donations</h5>
+                                <p>By making the donation process easier and more accessible</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <i class="fas fa-chart-line fa-3x text-danger mb-3"></i>
+                                <h5>Improve Efficiency</h5>
+                                <p>Through streamlined processes and real-time inventory management</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <i class="fas fa-heartbeat fa-3x text-danger mb-3"></i>
+                                <h5>Save Lives</h5>
+                                <p>By ensuring blood is available when and where it's needed most</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 class="mt-4">Blood Donation Facts</h4>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <ul>
+                            <li>One pint of blood can save up to three lives</li>
+                            <li>Someone needs blood every two seconds</li>
+                            <li>Only 37% of the population is eligible to donate blood</li>
+                            <li>Less than 10% of eligible donors actually donate</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul>
+                            <li>Blood cannot be manufactured – it can only come from donors</li>
+                            <li>The average adult has about 10 pints of blood in their body</li>
+                            <li>The most common blood type is O+</li>
+                            <li>O- is the universal donor type, but only 7% of people have it</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">Contact Us</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-map-marker-alt text-danger me-2"></i> Address</h5>
+                        <p>123 Blood Street<br>City, State 12345</p>
+                        
+                        <h5><i class="fas fa-phone text-danger me-2"></i> Phone</h5>
+                        <p>+1 (555) 123-4567</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-envelope text-danger me-2"></i> Email</h5>
+                        <p>info@bloodwind.com</p>
+                        
+                        <h5><i class="fas fa-clock text-danger me-2"></i> Hours</h5>
+                        <p>Monday - Friday: 9:00 AM - 5:00 PM<br>Saturday: 10:00 AM - 2:00 PM</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-danger">
+                        <i class="fas fa-envelope me-2"></i> Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

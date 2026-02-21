@@ -1,0 +1,191 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Donation History</h2>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Donations</h5>
+                    <h2 class="card-text">{{ total_donations }}</h2>
+                    <p class="text-muted">All Time</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Completed Donations</h5>
+                    <h2 class="card-text">{{ completed_count }}</h2>
+                    <p class="text-muted">All Time</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Units Donated</h5>
+                    <h2 class="card-text">{{ total_units }}</h2>
+                    <p class="text-muted">All Time</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Lives Saved</h5>
+                    <h2 class="card-text">{{ lives_saved }}</h2>
+                    <p class="text-muted">All Time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="hospital_id" class="form-label">Hospital</label>
+                    <select name="hospital_id" id="hospital_id" class="form-select">
+                        <option value="">All</option>
+                        {% for hospital in hospitals %}
+                        <option value="{{ hospital.id }}">{{ hospital.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date">
+                </div>
+                <div class="col-md-2">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Donation History Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Hospital</th>
+                            <th>Units</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donation in donations.items %}
+                        <tr>
+                            <td>{{ donation.request_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ donation.hospital.name }}</td>
+                            <td>{{ donation.units }}</td>
+                            <td>
+                                <span class="badge bg-{{ 
+                                    'success' if donation.status == 'completed' 
+                                    else 'warning' if donation.status == 'pending' 
+                                    else 'info' if donation.status == 'approved'
+                                    else 'danger'
+                                }}">
+                                    {{ donation.status.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if donation.status in ['completed', 'approved'] %}
+                                <a href="{{ url_for('donor.view_certificate', donation_id=donation.id) }}" 
+                                   class="btn btn-sm btn-success">View Certificate</a>
+                                {% elif donation.status == 'pending' %}
+                                <button type="button" class="btn btn-sm btn-danger" onclick="cancelDonation({{ donation.id }})">Cancel</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if donations.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('donor.donation_history', page=donations.prev_num) }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in donations.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                        {% if page_num %}
+                            {% if donations.page == page_num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('donor.donation_history', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if donations.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('donor.donation_history', page=donations.next_num) }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Add JavaScript for handling donation cancellation -->
+<script>
+function cancelDonation(donationId) {
+    if (confirm('Are you sure you want to cancel this donation?')) {
+        fetch(`/donor/cancel-donation/${donationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Error cancelling donation');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while cancelling the donation');
+        });
+    }
+}
+</script>
+{% endblock %}

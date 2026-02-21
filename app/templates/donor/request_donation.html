@@ -1,0 +1,161 @@
+{% extends "layout.html" %}
+{% block title %}Request Blood Donation{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h2 class="mb-0"><i class="fas fa-hand-holding-medical me-2"></i> Request Blood Donation</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success" role="alert">
+                    <h4 class="alert-heading"><i class="fas fa-check-circle me-2"></i> Eligibility Check</h4>
+                    <p>You are currently <strong>eligible</strong> to donate blood. Please complete the form below to submit your donation request.</p>
+                </div>
+                <p class="lead text-center mb-4">Submit a request to donate blood at a hospital of your choice</p>
+                
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <h4 class="alert-heading">Please fix the following errors:</h4>
+                    <ul>
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.hospital_id.label(class="form-label") }}
+                        {% if form.hospital_id.errors %}
+                            {{ form.hospital_id(class="form-select is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.hospital_id.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.hospital_id(class="form-select") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Select the hospital where you would like to donate blood.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Donation Date</label>
+                        <input type="date" class="form-control" id="donation_date" name="donation_date" required>
+                        <small class="form-text text-muted">Choose a preferred date for your donation. The hospital may contact you to confirm or reschedule.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.units.label(class="form-label") }}
+                        {% if form.units.errors %}
+                            {{ form.units(class="form-control is-invalid", type="number", min="1", max="2") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.units.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.units(class="form-control", type="number", min="1", max="2") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Standard donation is 1 unit (exactly 500ml of blood). Maximum 2 units (1000ml) per donation.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.notes.label(class="form-label") }}
+                        {% if form.notes.errors %}
+                            {{ form.notes(class="form-control is-invalid", rows=3) }}
+                            <div class="invalid-feedback">
+                                {% for error in form.notes.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.notes(class="form-control", rows=3) }}
+                        {% endif %}
+                        <small class="form-text text-muted">Optional: Include any additional information that might be relevant for your donation.</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="agree_to_terms" name="agree_to_terms" required>
+                            <label class="form-check-label" for="agree_to_terms">I agree to the terms and conditions</label>
+                            <small class="d-block form-text text-muted">By agreeing, you confirm that you are in good health and have provided accurate information.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <h5><i class="fas fa-info-circle me-2"></i> Before You Donate</h5>
+                        <ul>
+                            <li>Get a good night's sleep</li>
+                            <li>Eat a healthy meal before your donation</li>
+                            <li>Drink plenty of fluids</li>
+                            <li>Bring a valid ID</li>
+                            <li>Wear comfortable clothing with sleeves that can be rolled up</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-danger btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0"><i class="fas fa-history me-2"></i> Your Donation History</h3>
+            </div>
+            <div class="card-body">
+                {% if donation_history %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Hospital</th>
+                                <th>Date</th>
+                                <th>Units</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donation in donation_history %}
+                            <tr>
+                                <td>{{ donation.hospital.hospital_profile.name }}</td>
+                                <td>{{ donation.donation_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ donation.units }}</td>
+                                <td>
+                                    {% if donation.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif donation.status == 'approved' %}
+                                    <span class="badge bg-success">Approved</span>
+                                    {% elif donation.status == 'completed' %}
+                                    <span class="badge bg-primary">Completed</span>
+                                    {% elif donation.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ donation.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-tint fa-4x text-muted mb-3"></i>
+                    <p class="lead">You haven't made any donation requests yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

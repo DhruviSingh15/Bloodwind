@@ -1,0 +1,195 @@
+{% extends "layout.html" %}
+{% block title %}Donor Registration{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="form-container">
+            <h2 class="text-center mb-4">Donor Registration</h2>
+            <p class="text-center mb-4">Please fill out the form below to register as a blood donor</p>
+            
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.name.label(class="form-label") }}
+                        {% if form.name.errors %}
+                            {{ form.name(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.name(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.email.label(class="form-label") }}
+                        {% if form.email.errors %}
+                            {{ form.email(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.email(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.password.label(class="form-label") }}
+                        {% if form.password.errors %}
+                            {{ form.password(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.password(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.confirm_password.label(class="form-label") }}
+                        {% if form.confirm_password.errors %}
+                            {{ form.confirm_password(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.confirm_password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.confirm_password(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        {{ form.age.label(class="form-label") }}
+                        {% if form.age.errors %}
+                            {{ form.age(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.age.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.age(class="form-control") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Must be at least 18 years old</small>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.gender.label(class="form-label") }}
+                        {% if form.gender.errors %}
+                            {{ form.gender(class="form-select is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.gender.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.gender(class="form-select") }}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.weight.label(class="form-label") }}
+                        {% if form.weight.errors %}
+                            {{ form.weight(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.weight.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.weight(class="form-control") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Must be at least 50 kg</small>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.blood_group.label(class="form-label") }}
+                        {% if form.blood_group.errors %}
+                            {{ form.blood_group(class="form-select is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.blood_group.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.blood_group(class="form-select") }}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.phone.label(class="form-label") }}
+                        {% if form.phone.errors %}
+                            {{ form.phone(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.phone.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.phone(class="form-control") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Required for SMS notifications</small>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        {{ form.address.label(class="form-label") }}
+                        {% if form.address.errors %}
+                            {{ form.address(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.address.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.address(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.pincode.label(class="form-label") }}
+                        {% if form.pincode.errors %}
+                            {{ form.pincode(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.pincode.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.pincode(class="form-control") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Enter your 6-digit pincode</small>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> By registering, you agree to receive SMS notifications when your blood type is needed.
+                </div>
+                
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="btn btn-danger btn-lg") }}
+                </div>
+            </form>
+        </div>
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                Already have an account? <a href="{{ url_for('auth.login') }}">Login</a>
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}

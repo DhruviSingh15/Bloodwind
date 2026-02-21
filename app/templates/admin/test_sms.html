@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Test SMS Functionality</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Send Test SMS</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin.send_test_sms') }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group mb-3">
+                    <label for="phone_number">Phone Number (with country code)</label>
+                    {{ form.phone_number(class="form-control", placeholder="+91XXXXXXXXXX") }}
+                    {% if form.phone_number.errors %}
+                        <div class="text-danger">
+                            {% for error in form.phone_number.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="message">Message</label>
+                    {{ form.message(class="form-control", rows=3) }}
+                    {% if form.message.errors %}
+                        <div class="text-danger">
+                            {% for error in form.message.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Send SMS</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Twilio Configuration Status</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Account SID</th>
+                        <td>
+                            {% if twilio_sid %}
+                                <span class="badge bg-success">Configured</span>
+                                <small class="text-muted">{{ twilio_sid[:5] }}...{{ twilio_sid[-5:] }}</small>
+                            {% else %}
+                                <span class="badge bg-danger">Missing</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Auth Token</th>
+                        <td>
+                            {% if twilio_token %}
+                                <span class="badge bg-success">Configured</span>
+                            {% else %}
+                                <span class="badge bg-danger">Missing</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Phone Number</th>
+                        <td>
+                            {% if twilio_number %}
+                                <span class="badge bg-success">Configured</span>
+                                <span>{{ twilio_number }}</span>
+                            {% else %}
+                                <span class="badge bg-danger">Missing</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="alert alert-info mt-3">
+                <h6>How to configure Twilio:</h6>
+                <ol>
+                    <li>Create a Twilio account at <a href="https://www.twilio.com" target="_blank">twilio.com</a></li>
+                    <li>Get your Account SID and Auth Token from the Twilio dashboard</li>
+                    <li>Buy a phone number from Twilio</li>
+                    <li>Add these values to your .env file:
+                        <pre>TWILIO_ACCOUNT_SID=your_sid
+TWILIO_AUTH_TOKEN=your_token
+TWILIO_PHONE_NUMBER=your_number</pre>
+                    </li>
+                    <li>Restart the application</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    {% if sms_history %}
+    <div class="card mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Recent SMS History</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>To</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sms in sms_history %}
+                    <tr>
+                        <td>{{ sms.sent_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ sms.to_number }}</td>
+                        <td>{{ sms.message }}</td>
+                        <td>
+                            {% if sms.success %}
+                                <span class="badge bg-success">Success</span>
+                            {% else %}
+                                <span class="badge bg-danger">Failed</span>
+                                <small class="text-danger">{{ sms.error }}</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

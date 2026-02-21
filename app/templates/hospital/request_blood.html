@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+{% block title %}Request Blood Donation{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="form-container">
+            <h2 class="text-center mb-4">Request Blood Donation</h2>
+            <p class="text-center mb-4">Broadcast a request to eligible donors for urgent blood donations</p>
+            
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle me-2"></i> This will send SMS notifications to all eligible donors with the selected blood group.
+            </div>
+            
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.blood_group.label(class="form-label") }}
+                        {% if form.blood_group.errors %}
+                            {{ form.blood_group(class="form-select is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.blood_group.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.blood_group(class="form-select") }}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.units.label(class="form-label") }}
+                        {% if form.units.errors %}
+                            {{ form.units(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.units.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.units(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.urgency.label(class="form-label") }}
+                    {% if form.urgency.errors %}
+                        {{ form.urgency(class="form-select is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.urgency.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.urgency(class="form-select") }}
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.message.label(class="form-label") }}
+                    {% if form.message.errors %}
+                        {{ form.message(class="form-control is-invalid", rows=3) }}
+                        <div class="invalid-feedback">
+                            {% for error in form.message.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.message(class="form-control", rows=3, placeholder="Optional message to include in the SMS notification") }}
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="btn btn-danger btn-lg") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Blood Type Information -->
+<div class="card mt-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Blood Type Compatibility</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-danger">
+                    <tr>
+                        <th>Blood Type</th>
+                        <th>Can Donate To</th>
+                        <th>Can Receive From</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge blood-a-pos">A+</span></td>
+                        <td>A+, AB+</td>
+                        <td>A+, A-, O+, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-a-neg">A-</span></td>
+                        <td>A+, A-, AB+, AB-</td>
+                        <td>A-, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-b-pos">B+</span></td>
+                        <td>B+, AB+</td>
+                        <td>B+, B-, O+, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-b-neg">B-</span></td>
+                        <td>B+, B-, AB+, AB-</td>
+                        <td>B-, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-ab-pos">AB+</span></td>
+                        <td>AB+ only</td>
+                        <td>All blood types</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-ab-neg">AB-</span></td>
+                        <td>AB+, AB-</td>
+                        <td>A-, B-, AB-, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-o-pos">O+</span></td>
+                        <td>O+, A+, B+, AB+</td>
+                        <td>O+, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-o-neg">O-</span></td>
+                        <td>All blood types</td>
+                        <td>O- only</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

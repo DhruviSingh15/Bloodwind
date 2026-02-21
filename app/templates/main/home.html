@@ -1,0 +1,229 @@
+{% extends "layout.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <h1>Donate Blood, Save Lives</h1>
+        <p>Every donation can save up to three lives. Join our community of donors and hospitals to make a difference.</p>
+        {% if not current_user.is_authenticated %}
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-danger btn-lg">Register Now</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">Login</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-plus fa-3x text-danger mb-3"></i>
+                <h3 class="card-title">Donor Registration</h3>
+                <p class="card-text">Register as a blood donor and help save lives. Your donation can make a significant difference in someone's life.</p>
+                {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-danger">Register as Donor</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-hospital fa-3x text-danger mb-3"></i>
+                <h3 class="card-title">Hospital Portal</h3>
+                <p class="card-text">Hospitals can manage blood inventory, request donations, and connect with eligible donors.</p>
+                {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-danger">Register as Hospital</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-bell fa-3x text-danger mb-3"></i>
+                <h3 class="card-title">SMS Notifications</h3>
+                <p class="card-text">Get notified when your blood type is needed. Hospitals can broadcast urgent blood requests.</p>
+                {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-danger">Join Now</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">Why Donate Blood?</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-heart text-danger me-3 mt-1"></i>
+                        <div>
+                            <h5>Save Lives</h5>
+                            <p>A single donation can save up to 3 lives.</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-medkit text-danger me-3 mt-1"></i>
+                        <div>
+                            <h5>Health Check</h5>
+                            <p>Free mini health check-up during donation process.</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-heartbeat text-danger me-3 mt-1"></i>
+                        <div>
+                            <h5>Reduce Health Risks</h5>
+                            <p>Regular donation reduces risk of heart and liver ailments.</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-sync text-danger me-3 mt-1"></i>
+                        <div>
+                            <h5>Blood Regeneration</h5>
+                            <p>Stimulates production of new blood cells.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">Eligibility Criteria</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-calendar-alt text-danger me-3 mt-1"></i>
+                        <div>
+                            <h5>Age</h5>
+                            <p>Must be at least 18 years old.</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-weight text-danger me-3 mt-1"></i>
+                        <div>
+                            <h5>Weight</h5>
+                            <p>Must weigh at least 50 kg (110 lbs).</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-clock text-danger me-3 mt-1"></i>
+                        <div>
+                            <h5>Time Between Donations</h5>
+                            <p>At least 180 days since your last donation.</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="fas fa-heartbeat text-danger me-3 mt-1"></i>
+                        <div>
+                            <h5>Health</h5>
+                            <p>Must be in good general health and feeling well.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-5">
+    <div class="card-header bg-danger text-white">
+        <h3 class="mb-0">Blood Types Information</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Blood Type Compatibility</h4>
+                <table class="table table-bordered">
+                    <thead class="table-danger">
+                        <tr>
+                            <th>Blood Type</th>
+                            <th>Can Donate To</th>
+                            <th>Can Receive From</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge blood-a-pos">A+</span></td>
+                            <td>A+, AB+</td>
+                            <td>A+, A-, O+, O-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge blood-a-neg">A-</span></td>
+                            <td>A+, A-, AB+, AB-</td>
+                            <td>A-, O-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge blood-b-pos">B+</span></td>
+                            <td>B+, AB+</td>
+                            <td>B+, B-, O+, O-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge blood-b-neg">B-</span></td>
+                            <td>B+, B-, AB+, AB-</td>
+                            <td>B-, O-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge blood-ab-pos">AB+</span></td>
+                            <td>AB+ only</td>
+                            <td>All blood types</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge blood-ab-neg">AB-</span></td>
+                            <td>AB+, AB-</td>
+                            <td>A-, B-, AB-, O-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge blood-o-pos">O+</span></td>
+                            <td>O+, A+, B+, AB+</td>
+                            <td>O+, O-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge blood-o-neg">O-</span></td>
+                            <td>All blood types</td>
+                            <td>O- only</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h4>Blood Type Distribution</h4>
+                <p>Blood type distribution varies by ethnicity and region. Here's the approximate distribution in the general population:</p>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-success" style="width: 34%;">A+ (34%)</div>
+                </div>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-info" style="width: 6%;">A- (6%)</div>
+                </div>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-warning" style="width: 10%;">B+ (10%)</div>
+                </div>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-light text-dark" style="width: 2%;">B- (2%)</div>
+                </div>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-primary" style="width: 4%;">AB+ (4%)</div>
+                </div>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-secondary" style="width: 1%;">AB- (1%)</div>
+                </div>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-danger" style="width: 38%;">O+ (38%)</div>
+                </div>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-dark" style="width: 7%;">O- (7%)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

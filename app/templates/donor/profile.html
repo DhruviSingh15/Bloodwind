@@ -1,0 +1,182 @@
+{% extends "layout.html" %}
+{% block title %}Donor Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h2 class="mb-0"><i class="fas fa-user-edit me-2"></i> Donor Profile</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead text-center mb-4">Update your personal information and donation preferences</p>
+                
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <h4 class="alert-heading">Please fix the following errors:</h4>
+                    <ul>
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {% if form.name.errors %}
+                            {{ form.name(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.name(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.age.label(class="form-label") }}
+                                {% if form.age.errors %}
+                                    {{ form.age(class="form-control is-invalid", type="number", min="16", max="100") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.age.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.age(class="form-control", type="number", min="16", max="100") }}
+                                {% endif %}
+                                <small class="form-text text-muted">You must be at least 18 years old to donate blood.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.gender.label(class="form-label") }}
+                                {% if form.gender.errors %}
+                                    {{ form.gender(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.gender.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.gender(class="form-select") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.weight.label(class="form-label") }}
+                        {% if form.weight.errors %}
+                            {{ form.weight(class="form-control is-invalid", type="number", min="45") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.weight.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.weight(class="form-control", type="number", min="45") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Weight in kilograms. You must weigh at least 50 kg to donate blood.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.phone.label(class="form-label") }}
+                        {% if form.phone.errors %}
+                            {{ form.phone(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.phone.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.phone(class="form-control") }}
+                        {% endif %}
+                        <small class="form-text text-muted">Your phone number will be used for SMS notifications about blood donation requests.</small>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            {{ form.address.label(class="form-label") }}
+                            {% if form.address.errors %}
+                                {{ form.address(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.address.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.address(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form.pincode.label(class="form-label") }}
+                            {% if form.pincode.errors %}
+                                {{ form.pincode(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.pincode.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.pincode(class="form-control") }}
+                            {% endif %}
+                            <small class="form-text text-muted">Enter your 6-digit pincode</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-danger") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0"><i class="fas fa-shield-alt me-2"></i> Account Security</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+                            <small class="form-text text-muted">Email cannot be changed. Contact admin for assistance.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Last Login</label>
+                            <input type="text" class="form-control" value="{{ current_user.last_login.strftime('%Y-%m-%d %H:%M:%S') if current_user.last_login else 'Never' }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> For security reasons, if you need to change your password, please use the link below.
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('auth.reset_request') }}" class="btn btn-outline-danger">
+                        <i class="fas fa-key me-2"></i> Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends "donor/dashboard_layout.html" %}
+{% block title %}Donor Dashboard{% endblock %}
+
+{% from "_formhelpers.html" import render_field, render_hidden_field, csrf_field with context %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Welcome, {{ donor.name }}!</h2>
+        <p class="lead">Thank you for being a blood donor. Your contribution helps save lives.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="d-flex justify-content-end align-items-center">
+            <div class="me-3">
+                <span class="badge blood-badge 
+                    {% if donor.blood_group == 'A+' %}blood-a-pos
+                    {% elif donor.blood_group == 'A-' %}blood-a-neg
+                    {% elif donor.blood_group == 'B+' %}blood-b-pos
+                    {% elif donor.blood_group == 'B-' %}blood-b-neg
+                    {% elif donor.blood_group == 'AB+' %}blood-ab-pos
+                    {% elif donor.blood_group == 'AB-' %}blood-ab-neg
+                    {% elif donor.blood_group == 'O+' %}blood-o-pos
+                    {% elif donor.blood_group == 'O-' %}blood-o-neg
+                    {% endif %}">
+                    {{ donor.blood_group }}
+                </span>
+            </div>
+            {% if is_eligible %}
+                <a href="{{ url_for('donor.request_donation') }}" class="btn btn-danger">
+                    <i class="fas fa-heartbeat me-2"></i> Donate Now
+                </a>
+            {% else %}
+                <button class="btn btn-secondary" disabled data-bs-toggle="tooltip" title="{{ eligibility_message }}">
+                    <i class="fas fa-heartbeat me-2"></i> Donate Now
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Eligibility Status -->
+<div class="card mb-4">
+    <div class="card-header bg-{% if is_eligible %}success{% else %}warning{% endif %} text-white">
+        <h4 class="mb-0">
+            <i class="fas fa-{% if is_eligible %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+            Donation Eligibility Status
+        </h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h5>{% if is_eligible %}You are eligible to donate blood!{% else %}You are not eligible to donate at this time{% endif %}</h5>
+                <p>{{ eligibility_message }}</p>
+                
+                {% if not is_eligible and donor.last_donation_date %}
+                    <div class="progress mb-3">
+                        {% set days_since_last = (now - donor.last_donation_date).days %}
+                        {% set percentage = (days_since_last / 180) * 100 %}
+                        <div class="progress-bar bg-danger" role="progressbar" 
+                             style="width: {% if percentage <= 100 %}{{ percentage }}{% else %}100{% endif %}%;" 
+                             aria-valuenow="{{ days_since_last }}" aria-valuemin="0" aria-valuemax="180">
+                            {{ days_since_last }} days since last donation
+                        </div>
+                    </div>
+                    <small class="text-muted">You need to wait {{ 180 - days_since_last if days_since_last < 180 else 0 }} more days before you can donate again.</small>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-{% if is_eligible %}tint{% else %}hourglass-half{% endif %} fa-5x text-{% if is_eligible %}danger{% else %}warning{% endif %} mb-3"></i>
+                    {% if is_eligible %}
+                        <p>Your blood can save lives today!</p>
+                    {% else %}
+                        <p>Please check back later.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Donation Statistics -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Donation Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <h3 class="text-danger">{{ total_donations }}</h3>
+                        <p class="text-muted mb-0">Total Donations</p>
+                        <small class="text-muted">(All Time)</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <h3 class="text-danger">{{ completed_count }}</h3>
+                        <p class="text-muted mb-0">Completed</p>
+                        <small class="text-muted">(All Time)</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <h3 class="text-danger">{{ total_units }}</h3>
+                        <p class="text-muted mb-0">Units Donated</p>
+                        <small class="text-muted">(All Time)</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <h3 class="text-danger">{{ lives_saved }}</h3>
+                        <p class="text-muted mb-0">Lives Saved</p>
+                        <small class="text-muted">(Estimated)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Donations -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i> Recent Donations</h5>
+            </div>
+            <div class="card-body">
+                {% if donations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Hospital</th>
+                                    <th>Units</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for donation in donations %}
+                                    <tr>
+                                        <td>{{ donation.request_date.strftime('%d %b, %Y') }}</td>
+                                        <td>{{ donation.hospital.name }}</td>
+                                        <td>{{ donation.units }}</td>
+                                        <td>
+                                            <span class="badge {% if donation.status == 'completed' %}bg-success{% elif donation.status == 'pending' %}bg-warning text-dark{% elif donation.status == 'approved' %}bg-info{% else %}bg-danger{% endif %}">
+                                                {{ donation.status|capitalize }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if donation.status == 'completed' %}
+                                                <a href="{{ url_for('donor.view_certificate', donation_id=donation.id) }}" 
+                                                   class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-certificate"></i> Certificate
+                                                </a>
+                                            {% elif donation.status == 'pending' %}
+                                                <form action="{{ url_for('donor.cancel_donation', donation_id=donation.id) }}" 
+                                                      method="post" class="d-inline">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('Are you sure you want to cancel this donation request?')">
+                                                        <i class="fas fa-times"></i> Cancel
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if donations|length > 5 %}
+                        <div class="card-footer text-center">
+                            <a href="{{ url_for('donor.donation_history') }}" class="btn btn-link">View All Donations</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-tint fa-4x text-muted mb-3"></i>
+                        <p class="lead">You haven't made any donations yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Initialize tooltips -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock %}

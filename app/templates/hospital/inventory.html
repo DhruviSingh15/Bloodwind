@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+{% block title %}Blood Inventory{% endblock %}
+
+{% block styles %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% from "_formhelpers.html" import csrf_field %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Blood Inventory Management</h2>
+        <p class="lead">Manage your hospital's blood inventory and track available units.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('hospital.request_blood') }}" class="btn btn-danger">
+            <i class="fas fa-broadcast-tower me-2"></i> Request Blood Donation
+        </a>
+    </div>
+</div>
+
+<!-- Blood Inventory Cards -->
+<div class="row mb-4">
+    {% for item in inventory %}
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card h-100" data-inventory-id="{{ item.id }}">
+                <div class="card-header text-center 
+                    {% if item.blood_group == 'A+' %}blood-a-pos
+                    {% elif item.blood_group == 'A-' %}blood-a-neg
+                    {% elif item.blood_group == 'B+' %}blood-b-pos
+                    {% elif item.blood_group == 'B-' %}blood-b-neg
+                    {% elif item.blood_group == 'AB+' %}blood-ab-pos
+                    {% elif item.blood_group == 'AB-' %}blood-ab-neg
+                    {% elif item.blood_group == 'O+' %}blood-o-pos
+                    {% elif item.blood_group == 'O-' %}blood-o-neg
+                    {% endif %}">
+                    <h3 class="mb-0">{{ item.blood_group }}</h3>
+                </div>
+                <div class="card-body text-center">
+                    <h2 id="inventory-units-{{ item.id }}">{{ item.units }}</h2>
+                    <p class="text-muted">{{ item.units * 500 }}ml Available</p>
+                    
+                    {% if item.units < 5 %}
+                        <div class="alert alert-warning py-1 px-2 mb-3">
+                            <small><i class="fas fa-exclamation-triangle me-1"></i> Low Stock</small>
+                        </div>
+                    {% endif %}
+                    
+                    <form action="{{ url_for('hospital.update_inventory', inventory_id=item.id) }}" method="post" class="inventory-adjustment-form" data-inventory-id="{{ item.id }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="input-group mb-3">
+                            <input type="number" name="units" class="form-control" value="{{ item.units }}" min="0">
+                            <button class="btn btn-outline-danger" type="submit">Update</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center text-muted">
+                    <small>Last updated: {{ item.last_updated.strftime('%d %b, %Y %H:%M') }}</small>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Blood Inventory Chart -->
+<div class="card mt-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Blood Inventory Visualization</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h6 class="text-center mb-3">Blood Group Distribution</h6>
+                    <canvas id="inventory-pie-chart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h6 class="text-center mb-3">Blood Units by Group</h6>
+                    <canvas id="inventory-bar-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Blood Type Information -->
+<div class="card mt-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Blood Type Compatibility</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-danger">
+                    <tr>
+                        <th>Blood Type</th>
+                        <th>Can Donate To</th>
+                        <th>Can Receive From</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge blood-a-pos">A+</span></td>
+                        <td>A+, AB+</td>
+                        <td>A+, A-, O+, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-a-neg">A-</span></td>
+                        <td>A+, A-, AB+, AB-</td>
+                        <td>A-, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-b-pos">B+</span></td>
+                        <td>B+, AB+</td>
+                        <td>B+, B-, O+, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-b-neg">B-</span></td>
+                        <td>B+, B-, AB+, AB-</td>
+                        <td>B-, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-ab-pos">AB+</span></td>
+                        <td>AB+ only</td>
+                        <td>All blood types</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-ab-neg">AB-</span></td>
+                        <td>AB+, AB-</td>
+                        <td>A-, B-, AB-, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-o-pos">O+</span></td>
+                        <td>O+, A+, B+, AB+</td>
+                        <td>O+, O-</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge blood-o-neg">O-</span></td>
+                        <td>All blood types</td>
+                        <td>O- only</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+window.addEventListener('load', function() {
+    fetch('{{ url_for("hospital.inventory_chart_data") }}')
+        .then(response => response.json())
+        .then(data => {
+            initializeBloodCharts(data.groups, data.units);
+        })
+        .catch(error => {
+            console.error('Error loading chart data:', error);
+        });
+});
+
+// Handle inventory form submissions
+const forms = document.querySelectorAll('.inventory-adjustment-form');
+forms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const inventoryId = this.getAttribute('data-inventory-id');
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the displayed units
+                document.getElementById(`inventory-units-${inventoryId}`).textContent = data.units;
+                
+                // Refresh chart data
+                fetch('{{ url_for("hospital.inventory_chart_data") }}')
+                    .then(response => response.json())
+                    .then(chartData => {
+                        initializeBloodCharts(chartData.groups, chartData.units);
+                    });
+                
+                showFlashMessage('Inventory updated successfully', 'success');
+            } else {
+                showFlashMessage(data.message || 'Failed to update inventory', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showFlashMessage('An error occurred while updating inventory', 'danger');
+        });
+    });
+});
+
+function showFlashMessage(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    const container = document.querySelector('.container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}
